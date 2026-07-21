@@ -5,6 +5,7 @@ import { useProjectStore } from '../../store/projectStore'
 import RouteLayer from './RouteLayer'
 import NodeLayer from './NodeLayer'
 import DrawingTools from './DrawingTools'
+import CrossingLayer from './CrossingLayer'
 
 // Syncs map position back to store
 function MapSync() {
@@ -22,7 +23,7 @@ function MapSync() {
   return null
 }
 
-export default function MapView({ activeTool, selectedCableType, selectedDeviceType, onRouteComplete, onNodePlace, onEditRoute, onEditNode }) {
+export default function MapView({ activeTool, selectedCableType, selectedDeviceType, onRouteComplete, onNodePlace, onEditRoute, onEditNode, onCrossingPending, onEditCrossing }) {
   const mapCenter = useProjectStore((s) => s.mapCenter)
   const mapZoom = useProjectStore((s) => s.mapZoom)
 
@@ -43,6 +44,7 @@ export default function MapView({ activeTool, selectedCableType, selectedDeviceT
       <MapSync />
       <RouteLayer activeTool={activeTool} onEditRoute={onEditRoute} />
       <NodeLayer activeTool={activeTool} onEditNode={onEditNode} />
+      <CrossingLayer activeTool={activeTool} onCrossingPending={onCrossingPending} onEditCrossing={onEditCrossing} />
       <DrawingTools
         activeTool={activeTool}
         selectedCableType={selectedCableType}

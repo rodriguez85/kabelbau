@@ -5,7 +5,7 @@ const TOOLS = [
   { id: 'select', label: 'Auswählen', icon: '↖' },
   { id: 'cable', label: 'Strecke zeichnen', icon: '✏' },
   { id: 'device', label: 'Gerät platzieren', icon: '📍' },
-  { id: 'junction', label: 'Knotenpunkt', icon: '⊕' },
+  { id: 'crossing', label: 'Wegeübergang', icon: '⊗' },
   { id: 'delete', label: 'Löschen', icon: '🗑' },
 ]
 

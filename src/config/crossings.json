@@ -1,0 +1,22 @@
+{
+  "materials": {
+    "feldkabel": [
+      { "name": "Ankerpfähle", "count": 3 },
+      { "name": "Ankerseile", "count": 2 },
+      { "name": "Baustangen", "count": 2 },
+      { "name": "Baustangenverlängerung", "count": 1 }
+    ],
+    "feldfernkabel": [
+      { "name": "Ankerpfähle", "count": 3 },
+      { "name": "Ankerseile", "count": 2 },
+      { "name": "Baustangen", "count": 2 },
+      { "name": "Baustangenverlängerung", "count": 1 }
+    ],
+    "anschlusskabel": [
+      { "name": "Ankerpfähle", "count": 3 },
+      { "name": "Ankerseile", "count": 2 },
+      { "name": "Baustangen", "count": 2 },
+      { "name": "Baustangenverlängerung", "count": 1 }
+    ]
+  }
+}

@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { calculateDistance, calculateCablesNeeded } from '../utils/cableCalc'
-import cablesConfig from '../config/cables.json'
 
 const STORAGE_KEY = 'kabelbau_project'
 
@@ -9,6 +8,7 @@ const defaultState = {
   name: 'Neues Projekt',
   routes: [],
   nodes: [],
+  crossings: [],
   mapCenter: { lat: 51.1657, lng: 10.4515 },
   mapZoom: 7,
 }
@@ -33,7 +33,6 @@ export const useProjectStore = create(
     addRoute: (route) =>
       set((s) => ({ routes: [...s.routes, route] })),
 
-    // Add route and update connected node references atomically
     addRouteWithNodes: (route) =>
       set((s) => ({
         routes: [...s.routes, route],
@@ -57,6 +56,7 @@ export const useProjectStore = create(
           ...n,
           connectedRouteIds: n.connectedRouteIds.filter((rid) => rid !== id),
         })),
+        crossings: s.crossings.filter((c) => c.routeId !== id),
       })),
 
     // Nodes
@@ -78,6 +78,18 @@ export const useProjectStore = create(
         })),
       })),
 
+    // Crossings (Wegeübergänge)
+    addCrossing: (crossing) =>
+      set((s) => ({ crossings: [...s.crossings, crossing] })),
+
+    updateCrossing: (id, patch) =>
+      set((s) => ({
+        crossings: s.crossings.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+      })),
+
+    deleteCrossing: (id) =>
+      set((s) => ({ crossings: s.crossings.filter((c) => c.id !== id) })),
+
     // Project IO
     loadProject: (data) => set({ ...defaultState, ...data }),
 
@@ -85,13 +97,12 @@ export const useProjectStore = create(
   }))
 )
 
-// Autosave on every state change
 useProjectStore.subscribe(
   (state) => state,
   (state) => {
     try {
-      const { name, routes, nodes, mapCenter, mapZoom } = state
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ name, routes, nodes, mapCenter, mapZoom }))
+      const { name, routes, nodes, crossings, mapCenter, mapZoom } = state
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ name, routes, nodes, crossings, mapCenter, mapZoom }))
     } catch {}
   }
 )

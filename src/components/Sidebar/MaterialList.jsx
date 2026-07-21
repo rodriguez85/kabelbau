@@ -6,10 +6,11 @@ import { exportMaterialCSV } from '../../utils/projectIO'
 export default function MaterialList() {
   const routes = useProjectStore((s) => s.routes)
   const nodes = useProjectStore((s) => s.nodes)
+  const crossings = useProjectStore((s) => s.crossings)
 
-  const summary = useMemo(() => getMaterialSummary(routes, nodes), [routes, nodes])
+  const summary = useMemo(() => getMaterialSummary(routes, nodes, crossings), [routes, nodes, crossings])
 
-  const totalCables = summary.cables.reduce((s, c) => s + c.count, 0)
+  const empty = summary.cables.length === 0 && summary.devices.length === 0 && summary.crossingItems.length === 0
 
   return (
     <div className="p-3 space-y-4">
@@ -24,7 +25,7 @@ export default function MaterialList() {
         </button>
       </div>
 
-      {summary.cables.length > 0 ? (
+      {summary.cables.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-gray-600 mb-1">Kabel</p>
           <table className="w-full text-xs text-left">
@@ -49,8 +50,6 @@ export default function MaterialList() {
             </tbody>
           </table>
         </div>
-      ) : (
-        <p className="text-xs text-gray-400">Noch keine Strecken gezeichnet.</p>
       )}
 
       {summary.devices.length > 0 && (
@@ -75,7 +74,29 @@ export default function MaterialList() {
         </div>
       )}
 
-      {summary.cables.length === 0 && summary.devices.length === 0 && (
+      {summary.crossingItems.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-600 mb-1">Wegeübergänge</p>
+          <table className="w-full text-xs text-left">
+            <thead>
+              <tr className="text-gray-400">
+                <th className="pb-1">Material</th>
+                <th className="pb-1 text-right">Anz.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.crossingItems.map((item) => (
+                <tr key={item.name} className="border-t border-gray-100">
+                  <td className="py-1">{item.name}</td>
+                  <td className="py-1 text-right font-semibold">{item.count}×</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {empty && (
         <p className="text-xs text-gray-400">Zeichne Strecken und platziere Geräte,<br/>um die Materialliste zu sehen.</p>
       )}
     </div>

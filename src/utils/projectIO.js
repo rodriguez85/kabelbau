@@ -1,6 +1,6 @@
 export function exportProject(state) {
-  const { name, routes, nodes, mapCenter, mapZoom } = state
-  const data = { name, routes, nodes, mapCenter, mapZoom, exportedAt: new Date().toISOString() }
+  const { name, routes, nodes, crossings, mapCenter, mapZoom } = state
+  const data = { name, routes, nodes, crossings, mapCenter, mapZoom, exportedAt: new Date().toISOString() }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -61,8 +61,8 @@ export async function listServerProjects() {
 }
 
 export async function saveToServer(state) {
-  const { name, routes, nodes, mapCenter, mapZoom } = state
-  const data = { name, routes, nodes, mapCenter, mapZoom, savedAt: new Date().toISOString() }
+  const { name, routes, nodes, crossings, mapCenter, mapZoom } = state
+  const data = { name, routes, nodes, crossings, mapCenter, mapZoom, savedAt: new Date().toISOString() }
   const res = await fetch(`/api/projects/${encodeURIComponent(name)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

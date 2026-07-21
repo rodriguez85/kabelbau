@@ -1,7 +1,8 @@
 import cablesConfig from '../config/cables.json'
 import devicesConfig from '../config/devices.json'
+import crossingsConfig from '../config/crossings.json'
 
-export function getMaterialSummary(routes, nodes) {
+export function getMaterialSummary(routes, nodes, crossings = []) {
   const cableMap = {}
   for (const route of routes) {
     const cable = cablesConfig.cables.find((c) => c.id === route.cableType)
@@ -24,8 +25,19 @@ export function getMaterialSummary(routes, nodes) {
     deviceMap[device.id].count += 1
   }
 
+  const crossingItemMap = {}
+  for (const crossing of crossings) {
+    const materials = crossingsConfig.materials[crossing.cableType] ?? []
+    const mult = crossing.sided === 'beidseitig' ? 2 : 1
+    for (const m of materials) {
+      if (!crossingItemMap[m.name]) crossingItemMap[m.name] = { name: m.name, count: 0 }
+      crossingItemMap[m.name].count += m.count * mult
+    }
+  }
+
   return {
     cables: Object.values(cableMap),
     devices: Object.values(deviceMap),
+    crossingItems: Object.values(crossingItemMap),
   }
 }

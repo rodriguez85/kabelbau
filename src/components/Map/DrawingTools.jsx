@@ -148,24 +148,13 @@ export default function DrawingTools({ activeTool, selectedCableType, selectedDe
           connectedRouteIds: [],
         })
         onNodePlace?.()
-
-      } else if (activeTool === 'junction') {
-        const pos = { lat: e.latlng.lat, lng: e.latlng.lng }
-        addNode({
-          id: nanoid(),
-          type: 'junction',
-          deviceType: null,
-          name: 'Knotenpunkt',
-          position: pos,
-          connectedRouteIds: [],
-        })
       }
     },
   })
 
   useEffect(() => {
     const container = map.getContainer()
-    if (activeTool === 'cable' || activeTool === 'device' || activeTool === 'junction') {
+    if (activeTool === 'cable' || activeTool === 'device' || activeTool === 'crossing') {
       container.style.cursor = 'crosshair'
     } else if (activeTool === 'delete') {
       container.style.cursor = 'not-allowed'
