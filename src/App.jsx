@@ -19,11 +19,11 @@ export default function App() {
   const [editNode, setEditNode] = useState(null)
   const [pendingCrossing, setPendingCrossing] = useState(null)
 
-  function handleCrossingConfirm({ name, sided }) {
+  function handleCrossingConfirm({ name, sided, customCounts }) {
     if (pendingCrossing.id) {
-      updateCrossing(pendingCrossing.id, { name, sided })
+      updateCrossing(pendingCrossing.id, { name, sided, customCounts })
     } else {
-      addCrossing({ ...pendingCrossing, id: nanoid(), name, sided })
+      addCrossing({ ...pendingCrossing, id: nanoid(), name, sided, customCounts })
     }
     setPendingCrossing(null)
   }
