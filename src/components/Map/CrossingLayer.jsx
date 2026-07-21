@@ -2,43 +2,10 @@ import { useEffect, useRef } from 'react'
 import { useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { useProjectStore } from '../../store/projectStore'
+import { findNearestOnRoutes } from '../../utils/mapUtils'
 
 const SYMBOL_URLS = import.meta.glob('../../symbols/*.j2', { eager: true })
 const crossingSymbolUrl = SYMBOL_URLS['../../symbols/Wegeuebergang.j2']?.default ?? null
-
-const SNAP_PX = 20
-
-function nearestOnSegment(p, a, b) {
-  const dx = b.x - a.x
-  const dy = b.y - a.y
-  const lenSq = dx * dx + dy * dy
-  if (lenSq === 0) return { pt: L.point(a.x, a.y), dist: p.distanceTo(a) }
-  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq))
-  const pt = L.point(a.x + t * dx, a.y + t * dy)
-  return { pt, dist: p.distanceTo(pt) }
-}
-
-function findNearestOnRoutes(routes, clickLatLng, map) {
-  const clickPx = map.latLngToLayerPoint(clickLatLng)
-  let bestDist = Infinity
-  let bestRoute = null
-  let bestPt = null
-
-  for (const route of routes) {
-    if (route.points.length < 2) continue
-    const pts = route.points.map((p) => map.latLngToLayerPoint(L.latLng(p.lat, p.lng)))
-    for (let i = 0; i < pts.length - 1; i++) {
-      const { pt, dist } = nearestOnSegment(clickPx, pts[i], pts[i + 1])
-      if (dist < bestDist) { bestDist = dist; bestRoute = route; bestPt = pt }
-    }
-  }
-
-  if (bestRoute && bestDist <= SNAP_PX) {
-    const ll = map.layerPointToLatLng(bestPt)
-    return { route: bestRoute, position: { lat: ll.lat, lng: ll.lng } }
-  }
-  return null
-}
 
 function makeCrossingIcon() {
   if (crossingSymbolUrl) {

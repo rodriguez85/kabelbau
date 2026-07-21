@@ -30,8 +30,9 @@ export function getMaterialSummary(routes, nodes, crossings = []) {
     const materials = crossingsConfig.materials[crossing.cableType] ?? []
     const mult = crossing.sided === 'beidseitig' ? 2 : 1
     for (const m of materials) {
+      const count = crossing.customCounts?.[m.name] ?? m.count * mult
       if (!crossingItemMap[m.name]) crossingItemMap[m.name] = { name: m.name, count: 0 }
-      crossingItemMap[m.name].count += m.count * mult
+      crossingItemMap[m.name].count += count
     }
   }
 

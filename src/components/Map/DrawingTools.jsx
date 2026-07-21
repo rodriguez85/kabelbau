@@ -4,7 +4,9 @@ import L from 'leaflet'
 import { nanoid } from 'nanoid'
 import { useProjectStore } from '../../store/projectStore'
 import { calculateDistance, calculateCablesNeeded } from '../../utils/cableCalc'
+import { findNearestOnRoutes } from '../../utils/mapUtils'
 import cablesConfig from '../../config/cables.json'
+import devicesConfig from '../../config/devices.json'
 
 const SNAP_PX = 30
 const DBLCLICK_MS = 300
@@ -14,11 +16,12 @@ export default function DrawingTools({ activeTool, selectedCableType, selectedDe
   const addRouteWithNodes = useProjectStore((s) => s.addRouteWithNodes)
   const addNode = useProjectStore((s) => s.addNode)
   const nodes = useProjectStore((s) => s.nodes)
+  const routes = useProjectStore((s) => s.routes)
 
   const pointsRef = useRef([])
   const snapStartNodeIdRef = useRef(null)
   const lastClickTimeRef = useRef(0)
-  const justCompletedRef = useRef(false)  // blocks the follow-up click after auto-complete
+  const justCompletedRef = useRef(false)
   const previewLayerRef = useRef(null)
   const snapIndicatorRef = useRef(null)
 
@@ -42,7 +45,7 @@ export default function DrawingTools({ activeTool, selectedCableType, selectedDe
     pointsRef.current = []
     snapStartNodeIdRef.current = null
     lastClickTimeRef.current = 0
-    justCompletedRef.current = true   // ignore the next stray click after completion
+    justCompletedRef.current = true
     previewLayerRef.current?.clearLayers()
   }
 
@@ -83,28 +86,35 @@ export default function DrawingTools({ activeTool, selectedCableType, selectedDe
     resetDrawing()
   }
 
+  const selectedDevice = devicesConfig.devices.find((d) => d.id === selectedDeviceType)
+  const isInLine = selectedDevice?.inLine === true
+
   useMapEvents({
     mousemove(e) {
-      if (activeTool !== 'cable') return
-      const pos = { lat: e.latlng.lat, lng: e.latlng.lng }
-      const snapNode = findNearbyNode(pos, nodes, map, SNAP_PX)
-
-      snapIndicatorRef.current.clearLayers()
-      if (snapNode) {
-        L.circleMarker([snapNode.position.lat, snapNode.position.lng], {
-          radius: 20, color: '#f59e0b', weight: 2.5, fill: false, opacity: 0.9,
-        }).addTo(snapIndicatorRef.current)
+      if (activeTool === 'cable') {
+        const pos = { lat: e.latlng.lat, lng: e.latlng.lng }
+        const snapNode = findNearbyNode(pos, nodes, map, SNAP_PX)
+        snapIndicatorRef.current.clearLayers()
+        if (snapNode) {
+          L.circleMarker([snapNode.position.lat, snapNode.position.lng], {
+            radius: 20, color: '#f59e0b', weight: 2.5, fill: false, opacity: 0.9,
+          }).addTo(snapIndicatorRef.current)
+        }
+        updatePreview(snapNode ? snapNode.position : pos)
+      } else if (activeTool === 'device' && isInLine) {
+        snapIndicatorRef.current.clearLayers()
+        const result = findNearestOnRoutes(routes, e.latlng, map)
+        if (result) {
+          L.circleMarker([result.position.lat, result.position.lng], {
+            radius: 8, color: '#f59e0b', weight: 2, fill: true, fillOpacity: 0.4, opacity: 0.9,
+          }).addTo(snapIndicatorRef.current)
+        }
       }
-      updatePreview(snapNode ? snapNode.position : pos)
     },
 
     click(e) {
       if (activeTool === 'cable') {
-        // Absorb the stray click that follows a completion
-        if (justCompletedRef.current) {
-          justCompletedRef.current = false
-          return
-        }
+        if (justCompletedRef.current) { justCompletedRef.current = false; return }
 
         const now = Date.now()
         const isDblClick = now - lastClickTimeRef.current < DBLCLICK_MS
@@ -116,21 +126,15 @@ export default function DrawingTools({ activeTool, selectedCableType, selectedDe
         const pts = pointsRef.current
 
         if (isDblClick) {
-          // Second tap of a double-click → complete route with already-accumulated points
-          if (pts.length >= 2) {
-            completeRoute(pts, snapStartNodeIdRef.current, snapNode?.id ?? null)
-          } else {
-            resetDrawing()
-          }
+          if (pts.length >= 2) completeRoute(pts, snapStartNodeIdRef.current, snapNode?.id ?? null)
+          else resetDrawing()
           return
         }
 
-        // Single click
         if (pts.length === 0) {
           snapStartNodeIdRef.current = snapNode?.id ?? null
           pointsRef.current = [actualPos]
         } else if (snapNode) {
-          // Snap-complete: route reaches a device/junction
           completeRoute([...pts, actualPos], snapStartNodeIdRef.current, snapNode.id)
         } else {
           pointsRef.current = [...pts, actualPos]
@@ -138,15 +142,28 @@ export default function DrawingTools({ activeTool, selectedCableType, selectedDe
         }
 
       } else if (activeTool === 'device' && selectedDeviceType) {
-        const pos = { lat: e.latlng.lat, lng: e.latlng.lng }
-        addNode({
-          id: nanoid(),
-          type: 'device',
-          deviceType: selectedDeviceType,
-          name: selectedDeviceType,
-          position: pos,
-          connectedRouteIds: [],
-        })
+        if (isInLine) {
+          const result = findNearestOnRoutes(routes, e.latlng, map)
+          if (!result) return
+          addNode({
+            id: nanoid(),
+            type: 'inline',
+            deviceType: selectedDeviceType,
+            name: selectedDeviceType,
+            position: result.position,
+            connectedRouteIds: [result.route.id],
+          })
+        } else {
+          const pos = { lat: e.latlng.lat, lng: e.latlng.lng }
+          addNode({
+            id: nanoid(),
+            type: 'device',
+            deviceType: selectedDeviceType,
+            name: selectedDeviceType,
+            position: pos,
+            connectedRouteIds: [],
+          })
+        }
         onNodePlace?.()
       }
     },
