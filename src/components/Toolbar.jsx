@@ -76,7 +76,7 @@ export default function Toolbar() {
   }
 
   return (
-    <div className="h-12 bg-gray-900 text-white flex items-center px-4 gap-4 shadow-md flex-shrink-0 relative z-10">
+    <div className="h-12 bg-gray-900 text-white flex items-center px-4 gap-4 shadow-md flex-shrink-0 relative z-[1000]">
       <div className="flex items-center gap-2">
         <span className="text-blue-400 font-bold text-sm">⚡ Kabelbau</span>
         <span className="text-gray-600">|</span>
