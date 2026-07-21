@@ -19,9 +19,12 @@ jobs:
       - name: SSH Key einrichten
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          printf '%s' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan kabel.bennikaup.de >> ~/.ssh/known_hosts
+          cat >> ~/.ssh/known_hosts << 'EOF'
+          kabel.bennikaup.de ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMKcrHTCijyH1r/9+LD/2fGNIYUpXQEFPfj6Mjac7xEi
+          kabel.bennikaup.de ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBL3WS20XQTrnmyTTJhbKZy3aQr9cnior/eIbQ8diC3g220tv1am4fLbAYEuzpV60iWsr30y1ZT0kOQOYoTYnoLA=
+          EOF
 
       - name: Image übertragen und deployen
         run: |
