@@ -15,11 +15,20 @@ export default function Toolbar() {
   const [showServerList, setShowServerList] = useState(false)
   const [serverBusy, setServerBusy] = useState(false)
 
-  // Detect server on mount
+  // Detect server on mount, auto-load project from URL ?project= param
   useEffect(() => {
-    serverAvailable().then((ok) => {
+    serverAvailable().then(async (ok) => {
       setHasServer(ok)
-      if (ok) refreshServerList()
+      if (ok) {
+        refreshServerList()
+        const param = new URLSearchParams(window.location.search).get('project')
+        if (param) {
+          try {
+            const data = await loadFromServer(param)
+            loadProject(data)
+          } catch {}
+        }
+      }
     })
   }, [])
 
@@ -36,6 +45,7 @@ export default function Toolbar() {
       await saveToServer(state)
       await refreshServerList()
       setShowServerList(false)
+      history.replaceState(null, '', '?project=' + encodeURIComponent(name))
     } catch (err) {
       alert('Server-Speichern fehlgeschlagen: ' + err.message)
     } finally {
@@ -48,6 +58,7 @@ export default function Toolbar() {
       const data = await loadFromServer(projectName)
       loadProject(data)
       setShowServerList(false)
+      history.replaceState(null, '', '?project=' + encodeURIComponent(projectName))
     } catch (err) {
       alert('Laden fehlgeschlagen: ' + err.message)
     }
