@@ -1,0 +1,46 @@
+{
+  "devices": [
+    {
+      "id": "feldtelefon",
+      "name": "Feldtelefon",
+      "pairs": 1,
+      "inLine": false,
+      "symbol": "OB_Telefon.j2"
+    },
+    {
+      "id": "vermittlung10",
+      "name": "10er Vermittlung",
+      "pairs": 10,
+      "inLine": false,
+      "symbol": "Fernsprechvermittlung_OB10.j2"
+    },
+    {
+      "id": "vermittlung30",
+      "name": "30er Vermittlung",
+      "pairs": 30,
+      "inLine": false,
+      "symbol": "Fernsprechvermittlung_OB30.j2"
+    },
+    {
+      "id": "abholpunkt",
+      "name": "Abholpunkt",
+      "pairs": 1,
+      "inLine": false,
+      "symbol": "Abholpunkt.j2"
+    },
+    {
+      "id": "netzuebergang",
+      "name": "Netzübergang",
+      "pairs": 2,
+      "inLine": false,
+      "symbol": "AWINAP-OB.j2"
+    },
+    {
+      "id": "awitel",
+      "name": "Awitel",
+      "pairs": null,
+      "inLine": true,
+      "symbol": "Wahltelefon_AWITEL.j2"
+    }
+  ]
+}
